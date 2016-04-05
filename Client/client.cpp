@@ -74,8 +74,10 @@ int main(int argc, char **argv)
 	cout << "-------------------------------------------------------------------------------" << endl;
 	cout << "\t[Client]\tWelcome to the Chatly" << endl;
 	cout << "-------------------------------------------------------------------------------" << endl;
-	cout << "Enter the host ip: " << endl;
+	cout << "Enter the host ip (\"l\" for localhost): " << endl;
 	cin.getline(Ip, sizeof(Ip));
+	if (!strcmp(Ip, "l"))
+		strcpy(Ip, "localhost");
 	cout << "Connecting...";
 	// Initialize Winsock
 	iResult = sockInit();
@@ -120,6 +122,7 @@ int main(int argc, char **argv)
 		break;
 	}
 
+
 	freeaddrinfo(result);
 
 	if (ConnectSocket == INVALID_SOCKET) {
@@ -128,6 +131,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	cout << "Done!" << endl;
+
+	//-------------------------
+	// Set the socket I/O mode: In this case FIONBIO
+	// enables or disables the blocking mode for the 
+	// socket based on the numerical value of iMode.
+	// If iMode = 0, blocking is enabled; 
+	// If iMode != 0, non-blocking mode is enabled.
+	u_long iMode = 1;
+	iResult = ioctlsocket(ConnectSocket, FIONBIO, &iMode);
+	if (iResult != NO_ERROR)
+		printf("ioctlsocket failed with error: %ld\n", iResult);
+
 	cout << "[Client]: ";
 	cin.getline(sendbuf, sizeof(sendbuf));
 	// Send an initial buffer
